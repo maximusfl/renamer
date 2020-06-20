@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
-
 public class SongInspector extends MediaFileInspector {
 
   public SongInspector() {
@@ -51,23 +50,13 @@ public class SongInspector extends MediaFileInspector {
   void renameFile(File file) throws TagException, CannotReadException, InvalidAudioFrameException, IOException {
     AudioFile audioFile = AudioFileIO.read(file);
     Tag tag = audioFile.getTag().or(NullTag.INSTANCE);
-    final ImmutableSet<FieldKey> supportedFields = tag.getSupportedFields();
     if (!tag.isEmpty()) {
-      if (supportedFields.contains(FieldKey.TITLE)) {
-        String extension = FilenameUtils.getExtension(file.getName());
-        char extensionSeparator = FilenameUtils.EXTENSION_SEPARATOR;
-        String ordinal = "";
-        String title = tag.getValue(FieldKey.TITLE).or("");
-        if (supportedFields.contains(FieldKey.TRACK)) {
-          ordinal = tag.getValue(FieldKey.TRACK).or("") + " - ";
-        }
-        System.out.println("   file: [" + file.getName() + "] will be renamed to: [" + title + extensionSeparator + extension + "]");
-        file.renameTo(new File(
-            file.getParentFile().getAbsoluteFile()
-                + File.separator
-                + ordinal
-                + title + extensionSeparator + extension));
-      }
+      String newFileName = extractTagInfo(file, tag);
+      System.out.println("file: [" + file.getName() + "] will be renamed to: [" + newFileName + "]");
+      file.renameTo(new File(
+          file.getParentFile().getAbsoluteFile()
+              + File.separator
+              + newFileName));
     } else System.out.println(" file: [" + file.getName() + "] hasn't tags values");
   }
 
@@ -77,9 +66,27 @@ public class SongInspector extends MediaFileInspector {
     for (File foldersFile : files) {
       if (isMediaFile(foldersFile)) {
         renameFile(foldersFile);
-      } else {
+      }
+      if (foldersFile.isDirectory()) {
         inspect(foldersFile);
       }
     }
+  }
+
+  String extractTagInfo(File file, Tag tag) {
+    String newFileName = "";
+    final ImmutableSet<FieldKey> supportedFields = tag.getSupportedFields();
+    if (supportedFields.contains(FieldKey.TITLE)) {
+      String extension = FilenameUtils.getExtension(file.getName());
+      char extensionSeparator = FilenameUtils.EXTENSION_SEPARATOR;
+      String ordinal = "";
+      String title = tag.getValue(FieldKey.TITLE).or("");
+      newFileName = title + extensionSeparator + extension;
+      if (supportedFields.contains(FieldKey.TRACK)) {
+        ordinal = tag.getValue(FieldKey.TRACK).or("");
+        newFileName = ordinal + " - " + newFileName;
+      }
+    }
+    return newFileName;
   }
 }

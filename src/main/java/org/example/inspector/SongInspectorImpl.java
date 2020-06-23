@@ -62,15 +62,14 @@ public class SongInspectorImpl implements SongInspector {
     for (File foldersFile : files) {
       if (isMediaFile(foldersFile)) {
         renameFile(foldersFile);
-      }
-      else if (foldersFile.isDirectory()) {
+      } else if (foldersFile.isDirectory()) {
         inspect(foldersFile);
       }
     }
   }
 
   private String extractNameFromTag(final File file, final Tag tag) {
-    StringBuilder newFileName = new StringBuilder();
+    final StringBuilder newFileName = new StringBuilder();
     final ImmutableSet<FieldKey> supportedFields = tag.getSupportedFields();
 
     // building a base name without an ordinal

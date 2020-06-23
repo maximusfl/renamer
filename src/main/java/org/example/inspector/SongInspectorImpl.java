@@ -63,7 +63,7 @@ public class SongInspectorImpl implements SongInspector {
       if (isMediaFile(foldersFile)) {
         renameFile(foldersFile);
       }
-      if (foldersFile.isDirectory()) {
+      else if (foldersFile.isDirectory()) {
         inspect(foldersFile);
       }
     }
@@ -79,9 +79,9 @@ public class SongInspectorImpl implements SongInspector {
       final char extensionSeparator = FilenameUtils.EXTENSION_SEPARATOR;
       final String title = tag.getValue(FieldKey.TITLE).or("");
       newFileName.append(title).append(extensionSeparator).append(extension);
-    // add to name a track's ordinal
+      // add to name a track's ordinal
       if (supportedFields.contains(FieldKey.TRACK)) {
-       final String ordinal = tag.getValue(FieldKey.TRACK).or("");
+        final String ordinal = tag.getValue(FieldKey.TRACK).or("");
 
         if (!ordinal.isEmpty()) {
           newFileName.insert(0, ordinal).insert(ordinal.length(), " - ");
